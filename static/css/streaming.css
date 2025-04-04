@@ -1,0 +1,202 @@
+:root {
+    --primary-color: #00f2fe;
+    --secondary-color: #4facfe;
+    --accent-color: #f857a6;
+    --dark-color: #1a1a2e;
+    --light-color: #ffffff;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    background: var(--dark-color);
+    font-family: 'Segoe UI', sans-serif;
+    color: var(--light-color);
+}
+
+.navbar {
+    background: rgba(26, 26, 46, 0.95);
+    backdrop-filter: blur(10px);
+    padding: 1rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: fixed;
+    width: 100%;
+    top: 0;
+    z-index: 1000;
+    box-shadow: 0 2px 20px rgba(0, 242, 254, 0.2);
+}
+
+.navbar-brand {
+    font-size: 1.5rem;
+    background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-weight: bold;
+}
+
+.back-btn {
+    background: transparent;
+    border: 2px solid var(--primary-color);
+    color: var(--primary-color);
+    padding: 0.5rem 1.5rem;
+    border-radius: 25px;
+    margin-right: 35px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+}
+
+.back-btn:hover {
+    background: var(--primary-color);
+    color: var(--dark-color);
+}
+
+.stream-container {
+    margin-top: 80px;
+    padding: 2rem;
+    max-width: 1400px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.video-section {
+    margin-bottom: 2rem;
+    max-width: 640px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.video-container {
+    position: relative;
+    width: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 0 30px rgba(0, 242, 254, 0.2);
+    aspect-ratio: 16/9;
+}
+
+#videoElement {
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: cover;
+}
+
+.status-indicator {
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+    display: flex;
+    align-items: center;
+    background: rgba(0, 0, 0, 0.5);
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+}
+
+.status-dot {
+    width: 10px;
+    height: 10px;
+    background: #ff0000;
+    border-radius: 50%;
+    margin-right: 0.5rem;
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.2); opacity: 0.7; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+.recognition-details {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 15px;
+    padding: 2rem;
+    backdrop-filter: blur(10px);
+}
+
+.recognition-details h3 {
+    margin: 0 0 1.5rem 0;
+    background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-size: 1.5rem;
+}
+
+.details-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+}
+
+.detail-card {
+    background: rgba(255, 255, 255, 0.03);
+    padding: 1.5rem;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    transition: all 0.3s ease;
+}
+
+.detail-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 242, 254, 0.1);
+}
+
+.detail-icon {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 1rem;
+}
+
+.detail-icon i {
+    color: var(--dark-color);
+}
+
+.detail-info {
+    flex: 1;
+}
+
+.detail-info label {
+    display: block;
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.6);
+    margin-bottom: 0.25rem;
+}
+
+.detail-info span {
+    font-size: 1.1rem;
+    color: var(--light-color);
+}
+
+.update-animation {
+    animation: cardUpdate 0.5s ease;
+}
+
+@keyframes cardUpdate {
+    0% { background-color: rgba(0, 242, 254, 0.2); }
+    100% { background-color: rgba(255, 255, 255, 0.03); }
+}
+
+@media (max-width: 768px) {
+    .stream-container {
+        padding: 1rem;
+    }
+
+    .details-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .detail-card {
+        padding: 1rem;
+    }
+} 
