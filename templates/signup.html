@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up - AI Face Recognition</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/signup.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <div class="form-container">
+            <div class="logo-section">
+                <img src="{{ url_for('static', filename='images/ai-recognition.png') }}" alt="AI Logo">
+                <h1>AI Face Recognition</h1>
+            </div>
+            
+            <form action="{{ url_for('signup') }}" method="POST" class="signup-form">
+                <h2>Create Account</h2>
+                
+                <div class="input-group">
+                    <div class="input-field">
+                        <i class="fas fa-user"></i>
+                        <input type="text" name="username" placeholder="Username" required>
+                    </div>
+                    
+                    <div class="input-field">
+                        <i class="fas fa-envelope"></i>
+                        <input type="email" name="email" placeholder="Email" required>
+                    </div>
+                    
+                    <div class="input-field">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" name="password" placeholder="Password" required>
+                    </div>
+                    
+                    <div class="input-field">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" name="confirm_password" placeholder="Confirm Password" required>
+                    </div>
+                </div>
+
+                {% if error %}
+                <div class="error-message">
+                    {{ error }}
+                </div>
+                {% endif %}
+
+                <button type="submit" class="signup-btn">Sign Up</button>
+                
+                <div class="alternate-action">
+                    Already have an account? <a href="{{ url_for('login') }}">Login</a>
+                </div>
+            </form>
+        </div>
+        
+        <div class="image-container">
+            <div class="overlay"></div>
+        </div>
+    </div>
+
+    <!-- Success Popup -->
+    <div class="popup-overlay" id="successPopup" style="display: none;">
+        <div class="popup">
+            <div class="popup-content">
+                <div class="checkmark">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <h3>Success!</h3>
+                <p>Your account has been created successfully.</p>
+                <button class="popup-button" onclick="redirectToLogin()">Continue to Login</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showSuccess() {
+            document.getElementById('successPopup').style.display = 'flex';
+        }
+
+        function redirectToLogin() {
+            window.location.href = "{{ url_for('login') }}";
+        }
+
+        {% if success %}
+        showSuccess();
+        {% endif %}
+    </script>
+</body>
+</html> 

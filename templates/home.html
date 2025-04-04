@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home - AI Face Recognition</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/home.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="welcome-screen" id="welcomeScreen">
+        <img src="{{ url_for('static', filename='images/welcome.jpg') }}" alt="Welcome" class="welcome-image">
+        <h2 class="welcome-message">Welcome to Face Recognition System</h2>
+        <div class="loading-spinner"></div>
+    </div>
+
+    <nav class="navbar">
+        <div class="navbar-brand">AI Face Recognition</div>
+        <a href="{{ url_for('logout') }}" class="logout-btn">Logout</a>
+    </nav>
+
+    <div class="main-content">
+        <div class="tools-grid">
+            <div class="tool-card" onclick="location.href='{{ url_for('streaming') }}'">
+                <div class="tool-icon">
+                    <i class="fas fa-camera"></i>
+                </div>
+                <h3 class="tool-title">Live Streaming</h3>
+                <p class="tool-description">Real-time face detection and recognition through your camera</p>
+            </div>
+
+            <div class="tool-card" onclick="location.href='{{ url_for('recorded_data') }}'">
+                <div class="tool-icon">
+                    <i class="fas fa-film"></i>
+                </div>
+                <h3 class="tool-title">Recorded Data</h3>
+                <p class="tool-description">Analyze photos and videos for face recognition</p>
+            </div>
+
+            <div class="tool-card" onclick="location.href='{{ url_for('load_data') }}'">
+                <div class="tool-icon">
+                    <i class="fas fa-user-plus"></i>
+                </div>
+                <h3 class="tool-title">Load Data</h3>
+                <p class="tool-description">Register new faces for recognition</p>
+            </div>
+        </div>
+
+        <section class="about-section">
+            <div class="about-content">
+                <div class="about-text">
+                    <h2>About Our System</h2>
+                    <p>Welcome to our cutting-edge AI-powered face recognition system. We combine advanced machine learning algorithms with real-time processing to deliver accurate and reliable face detection and recognition.</p>
+                    <ul class="feature-list">
+                        <li>Real-time face detection and recognition</li>
+                        <li>High-accuracy matching algorithms</li>
+                        <li>Secure data storage and handling</li>
+                        <li>Multiple input options (live stream, photos, videos)</li>
+                        <li>User-friendly interface and controls</li>
+                    </ul>
+                </div>
+                <div class="about-image">
+                    <img src="{{ url_for('static', filename='images/8.jpg') }}" alt="AI Recognition" >
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        // Welcome screen animation
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                document.getElementById('welcomeScreen').style.opacity = '0';
+                setTimeout(() => {
+                    document.getElementById('welcomeScreen').style.display = 'none';
+                }, 500);
+            }, 2000);
+        });
+    </script>
+</body>
+</html> 

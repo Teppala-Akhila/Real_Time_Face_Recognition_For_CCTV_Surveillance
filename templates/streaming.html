@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Streaming - AI Face Recognition</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/streaming.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="navbar-brand">AI Face Recognition</div>
+        <a href="{{ url_for('home') }}" class="back-btn">
+            <i class="fas fa-arrow-left"></i> Back to Home
+        </a>
+    </nav>
+
+    <div class="stream-container">
+        <div class="video-section">
+            <div class="video-container">
+                <video id="videoElement" autoplay playsinline></video>
+                <div class="status-indicator">
+                    <div class="status-dot"></div>
+                    <span>Live</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="recognition-details">
+            <h3>Recognition Results</h3>
+            <div class="details-grid">
+                <div class="detail-card">
+                    <div class="detail-icon">
+                        <i class="fas fa-percentage"></i>
+                    </div>
+                    <div class="detail-info">
+                        <label>Match</label>
+                        <span id="matchPercentage">-</span>
+                    </div>
+                </div>
+                <div class="detail-card">
+                    <div class="detail-icon">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="detail-info">
+                        <label>Name</label>
+                        <span id="personName">-</span>
+                    </div>
+                </div>
+                <div class="detail-card">
+                    <div class="detail-icon">
+                        <i class="fas fa-birthday-cake"></i>
+                    </div>
+                    <div class="detail-info">
+                        <label>Age</label>
+                        <span id="personAge">-</span>
+                    </div>
+                </div>
+                <div class="detail-card">
+                    <div class="detail-icon">
+                        <i class="fas fa-venus-mars"></i>
+                    </div>
+                    <div class="detail-info">
+                        <label>Gender</label>
+                        <span id="personGender">-</span>
+                    </div>
+                </div>
+                <div class="detail-card">
+                    <div class="detail-icon">
+                        <i class="fas fa-phone"></i>
+                    </div>
+                    <div class="detail-info">
+                        <label>Phone</label>
+                        <span id="personPhone">-</span>
+                    </div>
+                </div>
+                <div class="detail-card">
+                    <div class="detail-icon">
+                        <i class="fas fa-id-card"></i>
+                    </div>
+                    <div class="detail-info">
+                        <label>Aadhar</label>
+                        <span id="personAadhar">-</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <script>
+        const video = document.getElementById('videoElement');
+        const socket = io();
+        let isStreaming = false;
+
+        // Start video stream
+        async function startVideo() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ 
+                    video: {
+                        width: { ideal: 640 },
+                        height: { ideal: 480 }
+                    }
+                });
+                video.srcObject = stream;
+                isStreaming = true;
+                startFrameCapture();
+            } catch (err) {
+                console.error("Error accessing webcam:", err);
+                alert("Error accessing webcam. Please make sure you have granted camera permissions.");
+            }
+        }
+
+        // Capture and send frames
+        function startFrameCapture() {
+            const canvas = document.createElement('canvas');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            const ctx = canvas.getContext('2d');
+
+            function captureFrame() {
+                if (!isStreaming) return;
+
+                ctx.drawImage(video, 0, 0);
+                canvas.toBlob(blob => {
+                    const reader = new FileReader();
+                    reader.onload = () => {
+                        socket.emit('video_frame', reader.result);
+                    };
+                    reader.readAsDataURL(blob);
+                }, 'image/jpeg', 0.7);
+
+                setTimeout(captureFrame, 100); // Capture every 100ms
+            }
+
+            video.addEventListener('play', () => {
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                captureFrame();
+            });
+        }
+
+        // Handle recognition results
+        socket.on('recognition_result', (data) => {
+            document.getElementById('matchPercentage').textContent = `${data.match_percentage}%`;
+            document.getElementById('personName').textContent = data.name || '-';
+            document.getElementById('personAge').textContent = data.age || '-';
+            document.getElementById('personGender').textContent = data.gender || '-';
+            document.getElementById('personPhone').textContent = data.phone || '-';
+            document.getElementById('personAadhar').textContent = data.aadhar || '-';
+
+            // Add animation to updated fields
+            const elements = document.querySelectorAll('.detail-card');
+            elements.forEach(el => {
+                el.classList.add('update-animation');
+                setTimeout(() => el.classList.remove('update-animation'), 500);
+            });
+        });
+
+        // Start streaming when page loads
+        window.onload = startVideo;
+
+        // Cleanup on page unload
+        window.onbeforeunload = () => {
+            isStreaming = false;
+            if (video.srcObject) {
+                video.srcObject.getTracks().forEach(track => track.stop());
+            }
+        };
+    </script>
+</body>
+</html> 

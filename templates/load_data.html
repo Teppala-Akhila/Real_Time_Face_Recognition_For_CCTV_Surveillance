@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Load Data - AI Face Recognition</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/load_data.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .popup-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            backdrop-filter: blur(5px);
+        }
+
+        .popup {
+            background: rgba(26, 26, 46, 0.95);
+            padding: 2rem;
+            border-radius: 15px;
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+            position: relative;
+            border: 1px solid var(--primary-color);
+            box-shadow: 0 0 30px rgba(0, 242, 254, 0.3);
+            animation: popupAppear 0.3s ease-out;
+        }
+
+        @keyframes popupAppear {
+            from {
+                transform: scale(0.8);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .popup-icon {
+            font-size: 4rem;
+            color: #00f2fe;
+            margin-bottom: 1rem;
+        }
+
+        .popup-title {
+            font-size: 1.5rem;
+            color: #fff;
+            margin-bottom: 1rem;
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .popup-message {
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 1.5rem;
+        }
+
+        .popup-button {
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+            color: var(--dark-color);
+            border: none;
+            padding: 0.8rem 2rem;
+            border-radius: 25px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .popup-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 242, 254, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="navbar-brand">AI Face Recognition</div>
+        <a href="{{ url_for('home') }}" class="back-btn">
+            <i class="fas fa-arrow-left"></i> Back to Home
+        </a>
+    </nav>
+
+    <div class="registration-container">
+        <div class="container-header">
+            <h2>Register New Face</h2>
+            <p>Add new faces to the recognition system</p>
+        </div>
+
+        <div class="error-message" id="errorMessage" style="display: none;"></div>
+        <div class="success-message" id="successMessage" style="display: none;"></div>
+
+        <form id="registrationForm" onsubmit="return handleSubmit(event)">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="name">Full Name *</label>
+                    <input type="text" id="name" name="name" required>
+                </div>
+                <div class="form-group">
+                    <label for="age">Age *</label>
+                    <input type="number" id="age" name="age" required min="1" max="120">
+                </div>
+                <div class="form-group">
+                    <label for="gender">Gender *</label>
+                    <select id="gender" name="gender" required>
+                        <option value="">Select Gender</option>
+                        <option value="male">Male</option>
+                        <option value="female">Female</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="phone">Phone Number *</label>
+                    <input type="tel" id="phone" name="phone" pattern="[0-9]{10}" required>
+                </div>
+                <div class="form-group">
+                    <label for="aadhar">Aadhar Number *</label>
+                    <input type="text" id="aadhar" name="aadhar" pattern="[0-9]{12}" required>
+                </div>
+            </div>
+
+            <h3>Capture Face Data</h3>
+            <div class="capture-options">
+                <div class="capture-option" onclick="handleCaptureOption('upload')">
+                    <i class="fas fa-upload"></i>
+                    <h4>Upload Image</h4>
+                    <p>Upload from device</p>
+                    <input type="file" id="imageUpload" accept="image/*" style="display: none;">
+                </div>
+                <div class="capture-option" onclick="handleCaptureOption('webcam')">
+                    <i class="fas fa-camera"></i>
+                    <h4>Use Webcam</h4>
+                    <p>Capture live photo</p>
+                </div>
+                <div class="capture-option" onclick="handleCaptureOption('video')">
+                    <i class="fas fa-video"></i>
+                    <h4>Upload Video</h4>
+                    <p>Extract from video</p>
+                    <input type="file" id="videoUpload" accept="video/*" style="display: none;">
+                </div>
+            </div>
+
+            <div class="preview-container" style="display: none;">
+                <img id="preview" alt="Preview">
+            </div>
+
+            <div class="webcam-container" id="webcamContainer" style="display: none;">
+                <video id="webcam" autoplay playsinline></video>
+                <div class="capture-controls">
+                    <button type="button" class="btn-secondary" onclick="stopWebcam()">Cancel</button>
+                    <button type="button" class="btn-primary" onclick="capturePhoto()">Capture Photo</button>
+                </div>
+            </div>
+
+            <button type="submit" class="btn-primary" style="width: 100%;">Register Face</button>
+        </form>
+
+        <div class="popup-overlay" id="successPopup">
+            <div class="popup">
+                <div class="popup-icon">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <h3 class="popup-title">Registration Successful!</h3>
+                <p class="popup-message">Face data has been successfully registered in the system.</p>
+                <button class="popup-button" onclick="closePopup()">Continue</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let capturedImage = null;
+
+        function handleSubmit(event) {
+            event.preventDefault();
+            
+            const formData = new FormData(event.target);
+            
+            // Check if we have a face image
+            if (!capturedImage) {
+                showError('Please capture or upload a face image');
+                return false;
+            }
+            
+            // Append the image to form data
+            formData.append('face_image', capturedImage);
+            
+            // Submit to /load_data instead of /register_face
+            fetch('/load_data', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showSuccess('Face registered successfully!');
+                    document.getElementById('registrationForm').reset();
+                    resetPreview();
+                } else {
+                    showError(data.error || 'Failed to register face');
+                }
+            })
+            .catch(error => {
+                showError('An error occurred. Please try again.');
+                console.error('Error:', error);
+            });
+            
+            return false;
+        }
+
+        // Handle different capture options
+        function handleCaptureOption(option) {
+            switch(option) {
+                case 'upload':
+                    document.getElementById('imageUpload').click();
+                    break;
+                case 'webcam':
+                    startWebcam();
+                    break;
+                case 'video':
+                    document.getElementById('videoUpload').click();
+                    break;
+            }
+        }
+
+        // Webcam handling
+        async function startWebcam() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                const video = document.getElementById('webcam');
+                video.srcObject = stream;
+                document.getElementById('webcamContainer').style.display = 'block';
+            } catch (error) {
+                showError('Unable to access webcam');
+                console.error('Webcam error:', error);
+            }
+        }
+
+        function stopWebcam() {
+            const video = document.getElementById('webcam');
+            const stream = video.srcObject;
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+            }
+            document.getElementById('webcamContainer').style.display = 'none';
+        }
+
+        function capturePhoto() {
+            const video = document.getElementById('webcam');
+            const canvas = document.createElement('canvas');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            canvas.getContext('2d').drawImage(video, 0, 0);
+            
+            canvas.toBlob(blob => {
+                capturedImage = blob;
+                const preview = document.getElementById('preview');
+                preview.src = URL.createObjectURL(blob);
+                document.querySelector('.preview-container').style.display = 'block';
+                stopWebcam();
+            }, 'image/jpeg');
+        }
+
+        // File upload handling
+        document.getElementById('imageUpload').addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            if (file) {
+                capturedImage = file;
+                const preview = document.getElementById('preview');
+                preview.src = URL.createObjectURL(file);
+                document.querySelector('.preview-container').style.display = 'block';
+            }
+        });
+
+        document.getElementById('videoUpload').addEventListener('change', handleVideoUpload);
+
+        function handleVideoUpload(event) {
+            const file = event.target.files[0];
+            if (file) {
+                // Process video file to extract face
+                const formData = new FormData();
+                formData.append('video', file);
+
+                fetch('/extract_face_from_video', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        capturedImage = data.face_image;
+                        const preview = document.getElementById('preview');
+                        preview.src = `data:image/jpeg;base64,${data.face_image}`;
+                        preview.style.display = 'block';
+                    } else {
+                        showError('No face detected in video');
+                    }
+                })
+                .catch(error => {
+                    showError('Error processing video');
+                    console.error('Error:', error);
+                });
+            }
+        }
+
+        // Helper functions
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+            setTimeout(() => {
+                errorDiv.style.display = 'none';
+            }, 5000);
+        }
+
+        function showSuccess(message) {
+            const successDiv = document.getElementById('successMessage');
+            successDiv.textContent = message;
+            successDiv.style.display = 'block';
+            setTimeout(() => {
+                successDiv.style.display = 'none';
+            }, 5000);
+        }
+
+        function resetPreview() {
+            capturedImage = null;
+            document.querySelector('.preview-container').style.display = 'none';
+            document.getElementById('preview').src = '';
+        }
+    </script>
+</body>
+</html> 

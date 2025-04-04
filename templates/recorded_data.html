@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recorded Data - Face Recognition System</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/recorded_data.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+
+    </style>
+</head>
+<body>
+    <div class="upload-container">
+        <a href="{{ url_for('home') }}" class="back-btn">← Back to Home</a>
+        <h2>Recorded Data Analysis</h2>
+
+        <div class="upload-options">
+            <div class="upload-option" id="photoOption">
+                <h3>Upload Photo</h3>
+                <p>Click to upload an image file</p>
+                <input type="file" id="photoInput" accept="image/*">
+            </div>
+            <div class="upload-option" id="videoOption">
+                <h3>Upload Video</h3>
+                <p>Click to upload a video file</p>
+                <input type="file" id="videoInput" accept="video/*">
+            </div>
+        </div>
+
+        <div class="preview-container">
+            <video id="videoPreview" controls style="display: none;"></video>
+            <img id="imagePreview" style="display: none;">
+        </div>
+
+        <div class="recognition-results" style="display: none;">
+            <h3>Recognition Results</h3>
+            <div class="result-grid">
+                <div class="result-item">
+                    <strong>Match Percentage:</strong>
+                    <span id="matchPercentage">-</span>
+                </div>
+                <div class="result-item">
+                    <strong>Name:</strong>
+                    <span id="personName">-</span>
+                </div>
+                <div class="result-item">
+                    <strong>Age:</strong>
+                    <span id="personAge">-</span>
+                </div>
+                <div class="result-item">
+                    <strong>Gender:</strong>
+                    <span id="personGender">-</span>
+                </div>
+                <div class="result-item">
+                    <strong>Phone:</strong>
+                    <span id="personPhone">-</span>
+                </div>
+                <div class="result-item">
+                    <strong>Aadhar:</strong>
+                    <span id="personAadhar">-</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Handle photo upload
+        document.getElementById('photoOption').addEventListener('click', () => {
+            document.getElementById('photoInput').click();
+        });
+
+        document.getElementById('photoInput').addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const img = document.getElementById('imagePreview');
+                    img.src = e.target.result;
+                    img.style.display = 'block';
+                    document.getElementById('videoPreview').style.display = 'none';
+                    
+                    // Send image for processing
+                    processImage(file);
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Handle video upload
+        document.getElementById('videoOption').addEventListener('click', () => {
+            document.getElementById('videoInput').click();
+        });
+
+        document.getElementById('videoInput').addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const video = document.getElementById('videoPreview');
+                video.src = URL.createObjectURL(file);
+                video.style.display = 'block';
+                document.getElementById('imagePreview').style.display = 'none';
+                
+                // Process video frames
+                processVideo(file);
+            }
+        });
+
+        // Process image function
+        async function processImage(file) {
+            const formData = new FormData();
+            formData.append('file', file);
+
+            try {
+                const response = await fetch('/process_image', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await response.json();
+                if (response.ok) {
+                    updateResults(data);
+                } else {
+                    alert(data.error || 'Error processing image. Please try again.');
+                }
+            } catch (error) {
+                console.error('Error processing image:', error);
+                alert('Error processing image. Please try again.');
+            }
+        }
+
+        // Process video function
+        async function processVideo(file) {
+            const formData = new FormData();
+            formData.append('file', file);
+
+            try {
+                const response = await fetch('/process_video', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await response.json();
+                updateResults(data);
+            } catch (error) {
+                console.error('Error processing video:', error);
+                alert('Error processing video. Please try again.');
+            }
+        }
+
+        // Update results in the UI
+        function updateResults(data) {
+            document.querySelector('.recognition-results').style.display = 'block';
+            document.getElementById('matchPercentage').textContent = `${data.match_percentage}%`;
+            document.getElementById('personName').textContent = data.name || '-';
+            document.getElementById('personAge').textContent = data.age || '-';
+            document.getElementById('personGender').textContent = data.gender || '-';
+            document.getElementById('personPhone').textContent = data.phone || '-';
+            document.getElementById('personAadhar').textContent = data.aadhar || '-';
+        }
+    </script>
+</body>
+</html> 
